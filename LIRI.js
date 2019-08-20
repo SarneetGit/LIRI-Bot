@@ -51,6 +51,12 @@ var questions = [{
             }
             return true
         }
+    },
+    {
+        name: 'again',
+        message: 'Would you like to try LIRA again?',
+        type: 'confirm',
+        default: false
     }
 ]
 
@@ -66,13 +72,22 @@ function sportifySearch(song) {
         data.tracks.items[0].artists.forEach(artist => {
             nameList.push(artist.name)
         });
+        let linkURL = ''
+         if (data.tracks.items[0].preview_url == null) {
+             linkURL = data.tracks.items[0].external_urls.spotify
+         }
+         else {
+            linkURL = data.tracks.items[0].preview_url
+         }
+        // console.log(JSON.stringify(data.tracks.items[0], null, 2));
         console.log(`--------------------------------------------------------------------------------------------------------------`)
         log(`The artists for '${data.tracks.items[0].name}' are: ${nameList.join(', ')}`)
         console.log(`--------------------------------------------------------------------------------------------------------------`)
-        log(`Click on the link below a quick sample listen! \n${data.tracks.items[0].preview_url}`)
+        log(`Click on the link below a quick sample listen! \n${linkURL}`)
         console.log(`--------------------------------------------------------------------------------------------------------------`)
         log(`Album: ${data.tracks.items[0].album.name}`)
         console.log(`--------------------------------------------------------------------------------------------------------------`)
+        askAgain(questions)
     });
 }
 
@@ -87,8 +102,11 @@ function bandsInTown(band) {
                 log(moment(event.datetime).format("dddd, MMMM Do YYYY, h:mm:ss a"))
                 console.log(`---------------------------------------------------------------------`)
                 log(`${event.venue.city}, ${event.venue.region}`)
+                console.log(`---------------------------------------------------------------------`)
+                askAgain(questions)
             } else {
                 log(`Sorry but ${band} does not have any events coming up...`)
+                askAgain(questions)
             }
         }
     ).catch((error) => {
@@ -124,8 +142,13 @@ function omdbSearch(movie) {
             log(`Actors: ${event.Actors}`)
             console.log(`---------------------------------------`)
             log(`${event.Plot}`)
+            console.log(`---------------------------------------`)
+            askAgain(questions)
         }
-    )
+    ).catch(err => {
+        console.log('Seems like your movie does not exist. ARE YOU MESSING WITH ME?')
+        askAgain(questions)
+    });
 }
 
 function getSongRandom() {
@@ -175,22 +198,33 @@ function log(message) {
     });
 }
 
-// Begin program by asking for input
-inquire.prompt(questions[0]).then(response => {
-    //Set choice as selection from questions
-    choice = response.choice
-    //If user selects do-what-it-says, go alternate path
-    if (response.choice === 'do-what-it-says') {
-        getSongRandom()
-    } 
-    //Else go logical path
-    else {
-        inquire.prompt(questions[1]).then(response => {
-            search = response.search.trim()
-            whatToExecute(choice)
-        })
-    }
-})
+function promptQuestions(list) {
+    inquire.prompt(list[0]).then(response => {
+        //Set choice as selection from questions
+        choice = response.choice
+        //If user selects do-what-it-says, go alternate path
+        if (response.choice === 'do-what-it-says') {
+            getSongRandom()
+        } 
+        //Else go logical path
+        else {
+            inquire.prompt(list[1]).then(response => {
+                search = response.search.trim()
+                whatToExecute(choice)
+            })
+        }
+    })
+}
+
+function askAgain(list) {
+    inquire.prompt(list[2]).then(response =>{
+        if (response.again) {
+            promptQuestions(list)
+        }
+    })
+}
+
+promptQuestions(questions)
 
 //Unit Testing each function
 // omdbSearch(defaultMovie)
