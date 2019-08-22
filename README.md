@@ -1,11 +1,11 @@
 # LIRI-Bot
 Language Interpretation and Recognition Interface
 
-##Demo
+## Demo
 
 <img src="./demo.gif">
 
 
-##Error Handling
+## Error Handling
 
 <img src="./error handling2.gif">
